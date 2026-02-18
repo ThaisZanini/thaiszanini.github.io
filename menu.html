@@ -155,14 +155,12 @@ Unir vários PDFs em um único arquivo
 
 <button class="botao"
 
-onclick="abrir('conversor-dp.html')">
+onclick="abrirConversor()">
 
 🔄 Conversor de Arquivos DP
 
 <div class="sub">
-
 Converter arquivos para o formato do sistema
-
 </div>
 
 </button>
@@ -177,13 +175,37 @@ Converter arquivos para o formato do sistema
 <script>
 
 function abrir(pagina){
-
 window.location.href = pagina;
+}
+
+
+  const chavesAutorizadas = [
+
+"HELJA123",
+"DP2024",
+"THAIS",
+"CONTABIL"
+];
+
+
+
+function abrirConversor(){
+let chave = prompt("Digite a chave de acesso:");
+if(chave === null) return;
+
+if(chavesAutorizadas.includes(chave.toUpperCase())){
+Window.location.href = "conversor-dp.html";
+}
+else{
+alert("Acesso negado");}
 
 }
 
 </script>
 
+</script>
+
 </body>
 </html>
+
 
