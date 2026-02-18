@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Juntar PDFs – Helija Organização Contábil</title>
+
+  <style>
+  :root{
+    --azul: #1F4466;
+    --azul-2: #2b6b92;
+    --cinza-escuro: #2b3340;
+    --cinza-claro: #F5F7FA;
+    --cinza-borda: #E1E5EA;
+    --card-bg: #ffffff;
+    --muted: #6b7280;
+    --glass: rgba(255,255,255,0.6);
+    --success: #16a34a;
+  }
+
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Helvetica Neue";}
+  body{
+    background: linear-gradient(180deg, #f7fbff 0%, var(--cinza-claro) 100%);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:28px;
+  }
+
+  .shell{
+    width:100%;
+    max-width:1100px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    align-items:center;
+  }
+
+  /* Header / Logo */
+  header{
+    width:100%;
+    text-align:center;
+  }
+  header img{
+    max-width:260px;
+    height:auto;
+    display:inline-block;
+    margin-bottom:6px;
+  }
+
+  /* Card */
+  .container{
+    width:100%;
+    background: var(--card-bg);
+    border-radius:16px;
+    padding:28px;
+    box-shadow: 0 10px 30px rgba(15,23,42,0.06);
+    border:1px solid var(--cinza-borda);
+  }
+
+  .top-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+
+  h1{
+    margin:0 0 6px 0;
+    font-size:22px;
+    color:var(--azul);
+    letter-spacing: -0.2px;
+  }
+
+  p.lead{
+    margin:0 0 12px 0;
+    color:var(--cinza-escuro);
+  }
+
+  label .small{
+    display:block;
+    font-size:12px;
+    color:#667085;
+    margin-bottom:6px;
+  }
+
+  select.select{
+    appearance:none;
+    padding:10px 14px;
+    padding-right:36px;
+    font-size:14px;
+    border-radius:10px;
+    background:#fff;
+    color:var(--cinza-escuro);
+    border:1px solid var(--cinza-borda);
+    min-width:220px;
+  }
+
+  /* Modern buttons */
+  .btn {
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    justify-content:center;
+    border:0;
+    cursor:pointer;
+    font-weight:700;
+    font-size:14px;
+    padding:10px 18px;
+    border-radius:12px;
+    transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    box-shadow: 0 6px 18px rgba(31,68,102,0.12);
+    will-change: transform;
+  }
+
+  /* Primary action */
+  .btn--primary {
+    background: linear-gradient(90deg,var(--azul), var(--azul-2));
+    color:#fff;
+    color-scheme: dark;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.08);
+  }
+  .btn--primary:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(31,68,102,0.14); }
+  .btn--primary:active { transform: translateY(-1px) scale(.997); }
+  .btn--primary:focus { outline: 3px solid rgba(43,107,146,0.16); outline-offset: 3px; }
+
+  /* Secondary / ghost */
+  .btn--ghost {
+    background: transparent;
+    color:var(--cinza-escuro);
+    border:1px solid rgba(15,23,42,0.06);
+    box-shadow: 0 4px 10px rgba(15,23,42,0.04);
+    padding:9px 16px;
+  }
+  .btn--ghost:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(15,23,42,0.06); }
+  .btn--ghost:focus { outline: 3px solid rgba(99,102,241,0.08); outline-offset:3px; }
+
+  /* Disabled */
+  .btn[disabled] {
+    opacity:0.56;
+    cursor:not-allowed;
+    transform:none;
+    box-shadow:none;
+  }
+
+  /* File label styled like a pill */
+  .file-input { display:none; }
+  .file-label{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+    padding:10px 14px;
+    border-radius:12px;
+    border:1px dashed var(--cinza-borda);
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), #fbfdff);
+    color:var(--cinza-escuro);
+    min-width:240px;
+    font-weight:600;
+    transition: transform .12s ease, box-shadow .12s ease;
+    box-shadow: 0 6px 18px rgba(11,20,30,0.03);
+  }
+  .file-label:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(11,20,30,0.05); }
+  .file-label svg { opacity:0.95; }
+
+  .controls {
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+
+  .controls-left { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .controls-right{
+    margin-left:auto;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+
+  .preview{
+    margin-top:14px;
+    background: #fbfdff;
+    padding:14px;
+    border-radius:10px;
+    min-height:200px;
+    font-family:monospace;
+    font-size:13px;
+    overflow:auto;
+    color:#0f172a;
+    white-space:pre-wrap;
+    border:1px solid var(--cinza-borda);
+  }
+
+  .footer{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:14px;
+  }
+
+  .info{
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .file-name{
+    font-size:13px;
+    color:var(--cinza-escuro);
+    margin-top:6px;
+  }
+
+  .hint{
+    margin-top:10px;
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .status{
+    margin-top:12px;
+    font-size:14px;
+    color:var(--cinza-escuro);
+    min-height:20px;
+  }
+
+  progress {
+    width:100%;
+    height:10px;
+    border-radius:8px;
+    overflow:hidden;
+    accent-color: var(--azul);
+    margin-top:12px;
+  }
+
+  /* small responsive tweaks */
+  @media (max-width:780px) {
+    .controls-right{ margin-left:0; width:100%; justify-content:stretch; flex-direction:column; }
+    .top-row{flex-direction:column; align-items:stretch;}
+    .file-label, .select, .btn { width:100%;}
+    .controls { gap:8px; }
+  }
+  </style>
+</head>
+<body>
+
+  <div class="shell">
+    <header>
+      <img src="assets/logo-horizontal.png" alt="Helija Logo">
+    </header>
+    <!-- Card principal -->
+    <main class="container" role="main" aria-labelledby="main-title">
+      <h1 id="main-title">Juntar PDFs</h1>
+      <p class="lead">Selecione vários arquivos PDF para juntar em um único documento.</p>
+
+      <div class="controls">
+        <!-- file input hidden, styled label -->
+        <div class="controls-left">
+          <label for="files" class="file-label" title="Selecionar arquivos PDF">
+            <!-- small SVG icon -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path d="M12 3v10" stroke="#1F4466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 7l4-4 4 4" stroke="#1F4466" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="3" y="13" width="18" height="8" rx="2" stroke="#1F4466" stroke-width="1.2"/>
+            </svg>
+            <span id="fileLabelText">Escolher arquivos</span>
+          </label>
+          <input id="files" class="file-input" type="file" accept="application/pdf" multiple aria-describedby="fileLabelText"/>
+        </div>
+
+        <!-- actions -->
+        <div class="controls-right" role="group" aria-label="Ações">
+          <button id="mergeBtn" class="btn btn--primary" disabled>
+            <!-- download icon -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11l4 4 4-4" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Juntar e Baixar
+          </button>
+
+          <button id="clearBtn" type="button" class="btn btn--ghost" aria-pressed="false">
+            <!-- x icon -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Limpar
+          </button>
+        </div>
+      </div>
+
+      <div class="status" id="status" aria-live="polite"></div>
+
+      <div class="hint">Dica: arraste para reordenar os arquivos antes de juntar.</div>
+
+      <ul id="fileList" style="margin-top:16px; padding-left:18px;"></ul>
+
+      <progress id="progress" value="0" max="100" style="display:none;"></progress>
+    </main>
+  </div>
+
+  <!-- pdf-lib -->
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+  <script>
+    const { PDFDocument } = PDFLib;
+
+    const input = document.getElementById('files');
+    const mergeBtn = document.getElementById('mergeBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const status = document.getElementById('status');
+    const fileListEl = document.getElementById('fileList');
+    const progress = document.getElementById('progress');
+    const fileLabelText = document.getElementById('fileLabelText');
+
+    let selectedFiles = [];
+
+    input.addEventListener('change', () => {
+      selectedFiles = Array.from(input.files);
+      renderFileList();
+      mergeBtn.disabled = selectedFiles.length === 0;
+      status.textContent = selectedFiles.length ? `${selectedFiles.length} arquivo(s) selecionado(s)` : '';
+      fileLabelText.textContent = selectedFiles.length ? `${selectedFiles.length} arquivo(s)` : 'Escolher arquivos';
+    });
+
+    clearBtn.addEventListener('click', () => {
+      selectedFiles = [];
+      input.value = '';
+      renderFileList();
+      mergeBtn.disabled = true;
+      status.textContent = '';
+      fileLabelText.textContent = 'Escolher arquivos';
+      progress.style.display = 'none';
+    });
+
+    function renderFileList() {
+      fileListEl.innerHTML = '';
+      selectedFiles.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}. ${file.name}`;
+        li.draggable = true;
+        li.style.padding = '8px 10px';
+        li.style.borderRadius = '8px';
+        li.style.marginBottom = '6px';
+        li.style.background = 'linear-gradient(180deg, rgba(250,250,253,0.8), #ffffff)';
+        li.style.border = '1px solid var(--cinza-borda)';
+        li.style.cursor = 'grab';
+
+        li.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', index);
+          li.style.opacity = '0.5';
+        });
+
+        li.addEventListener('dragend', () => li.style.opacity = '1');
+        li.addEventListener('dragover', (e) => e.preventDefault());
+
+        li.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const from = Number(e.dataTransfer.getData('text/plain'));
+          const to = index;
+          if (isNaN(from)) return;
+          const item = selectedFiles.splice(from, 1)[0];
+          selectedFiles.splice(to, 0, item);
+          renderFileList();
+        });
+
+        fileListEl.appendChild(li);
+      });
+    }
+
+    mergeBtn.addEventListener('click', async () => {
+      try {
+        mergeBtn.disabled = true;
+        clearBtn.disabled = true;
+        progress.style.display = 'block';
+        progress.value = 0;
+        status.textContent = 'Iniciando...';
+
+        const mergedPdf = await PDFDocument.create();
+
+        for (let i = 0; i < selectedFiles.length; i++) {
+          const file = selectedFiles[i];
+          status.textContent = `Processando ${file.name}...`;
+
+          const bytes = await file.arrayBuffer();
+          const pdf = await PDFDocument.load(bytes);
+
+          const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+          pages.forEach((p) => mergedPdf.addPage(p));
+
+          progress.value = Math.round(((i + 1) / selectedFiles.length) * 80);
+        }
+
+        const mergedBytes = await mergedPdf.save();
+
+        const blob = new Blob([mergedBytes], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "juntado.pdf";
+        link.click();
+
+        progress.value = 100;
+        status.textContent = "PDF gerado com sucesso!";
+      } catch (err) {
+        status.textContent = "Erro ao juntar PDFs: " + (err.message || err);
+      } finally {
+        mergeBtn.disabled = false;
+        clearBtn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>
