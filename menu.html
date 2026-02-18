@@ -194,7 +194,7 @@ let chave = prompt("Digite a chave de acesso:");
 if(chave === null) return;
 
 if(chavesAutorizadas.includes(chave.toUpperCase())){
-Window.location.href = "conversor-dp.html";
+window.open("conversor-dp.html", "_self");
 }
 else{
 alert("Acesso negado");}
@@ -207,5 +207,6 @@ alert("Acesso negado");}
 
 </body>
 </html>
+
 
 
