@@ -213,6 +213,7 @@
           <button id="processBtn" class="btn" title="Gerar arquivo .txt">Gerar arquivo .txt</button>
           <button id="previewBtn" class="secondary" title="Visualizar resultado">Visualizar</button>
           <button id="clearBtn" class="secondary" title="Limpar">Limpar</button>
+          <button class="secondary" onclick="abrir('index.html')">Voltar</button>
         </div>
       </div>
 
@@ -242,6 +243,10 @@ const modeSelect = document.getElementById('mode');
 let workbookData = null;
 let lastTxt = "";
 let uploadedFileName = "";
+
+function abrir(pagina){
+window.location.href = pagina;
+}
 
 fileInput.addEventListener('change', async (e) => {
   const f = e.target.files[0];
@@ -701,3 +706,4 @@ function runLancamentosFolhaGeral(wb) {
 </script>
 </body>
 </html>
+
