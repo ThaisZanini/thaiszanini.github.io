@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+<title>Helija Organização Contábil</title>
+
+<style>
+
+:root{
+  --azul: #1F4466;
+  --azul-2: #2b6b92;
+  --cinza-claro: #F5F7FA;
+  --cinza-borda: #E1E5EA;
+  --card-bg: #ffffff;
+  --cinza-escuro:#2b3340;
+}
+
+body{
+  margin:0;
+  font-family:Inter, system-ui;
+  background: linear-gradient(180deg, #f7fbff 0%, var(--cinza-claro) 100%);
+  display:flex;
+  justify-content:center;
+  padding:30px;
+}
+
+.shell{
+  width:100%;
+  max-width:1000px;
+}
+
+header{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+header img{
+  max-width:260px;
+}
+
+.container{
+
+  background:white;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  border:1px solid var(--cinza-borda);
+
+}
+
+h1{
+
+  text-align:center;
+  color:var(--azul);
+  margin-bottom:30px;
+
+}
+
+.menu{
+
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  flex-wrap:wrap;
+
+}
+
+.botao{
+
+  flex:1;
+  min-width:260px;
+  max-width:320px;
+
+  padding:40px 20px;
+
+  border-radius:14px;
+
+  border:none;
+
+  cursor:pointer;
+
+  font-size:20px;
+
+  font-weight:bold;
+
+  background: linear-gradient(90deg,var(--azul),var(--azul-2));
+
+  color:white;
+
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+
+  transition:0.2s;
+
+}
+
+.botao:hover{
+
+  transform:translateY(-5px);
+
+  box-shadow:0 15px 35px rgba(0,0,0,0.20);
+
+}
+
+.botao:active{
+
+  transform:scale(0.98);
+
+}
+
+.sub{
+
+  font-size:14px;
+  font-weight:normal;
+  opacity:0.9;
+  margin-top:10px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="shell">
+
+<header>
+
+<img src="assets/logo-horizontal.png">
+
+</header>
+
+<div class="container">
+
+<h1>Sistemas disponíveis</h1>
+
+<div class="menu">
+
+<button class="botao"
+
+onclick="abrir('juntapdf.html')">
+
+📄 Juntar PDFs
+
+<div class="sub">
+
+Unir vários PDFs em um único arquivo
+
+</div>
+
+</button>
+
+
+<button class="botao"
+
+onclick="abrir('conversor-dp.html')">
+
+🔄 Conversor de Arquivos DP
+
+<div class="sub">
+
+Converter arquivos para o formato do sistema
+
+</div>
+
+</button>
+
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function abrir(pagina){
+
+window.location.href = pagina;
+
+}
+
+</script>
+
+</body>
+</html>
