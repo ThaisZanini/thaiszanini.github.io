@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Painel — Lançamentos Folha</title>
+
+<!-- SheetJS -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<style>
+  :root{
+    --azul: #1F4466;
+    --cinza-escuro: #4A4A4A;
+    --cinza-claro: #F5F7FA;
+    --cinza-borda: #E1E5EA;
+    --card-bg: #ffffff;
+    --muted: #6b7280;
+  }
+
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+  body{
+    background: var(--cinza-claro);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:28px;
+  }
+
+  .shell{
+    width:100%;
+    max-width:1100px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    align-items:center;
+  }
+
+  /* Header / Logo */
+  header{
+    width:100%;
+    text-align:center;
+  }
+  header img{
+    max-width:260px;
+    height:auto;
+    display:inline-block;
+    margin-bottom:6px;
+  }
+
+  /* Card */
+  .container{
+    width:100%;
+    background: var(--card-bg);
+    border-radius:14px;
+    padding:24px;
+    box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+    border:1px solid var(--cinza-borda);
+  }
+
+  .top-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+
+  h1{
+    margin:0 0 4px 0;
+    font-size:20px;
+    color:var(--azul);
+  }
+
+  p.lead{
+    margin:0 0 12px 0;
+    color:var(--cinza-escuro);
+  }
+
+  label .small{
+    display:block;
+    font-size:12px;
+    color:#667085;
+    margin-bottom:6px;
+  }
+
+  select.select{
+    appearance:none;
+    padding:10px 14px;
+    padding-right:36px;
+    font-size:14px;
+    border-radius:10px;
+    background:#fff;
+    color:var(--cinza-escuro);
+    border:1px solid var(--cinza-borda);
+    min-width:220px;
+  }
+
+  .filebtn, .btn{
+    background: linear-gradient(90deg,var(--azul), #2b6b92);
+    color:white;
+    border:none;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:14px;
+    cursor:pointer;
+    font-weight:600;
+  }
+
+  .secondary{
+    background:transparent;
+    border:1px dashed var(--cinza-borda);
+    color:var(--cinza-escuro);
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+
+  .file-input{display:none;}
+  .file-label{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid var(--cinza-borda);
+    background:#fff;
+    color:var(--cinza-escuro);
+    min-width:220px;
+  }
+
+  .controls-right{
+    margin-left:auto;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+
+  .preview{
+    margin-top:14px;
+    background: #fbfdff;
+    padding:14px;
+    border-radius:10px;
+    min-height:200px;
+    font-family:monospace;
+    font-size:13px;
+    overflow:auto;
+    color:#0f172a;
+    white-space:pre-wrap;
+    border:1px solid var(--cinza-borda);
+  }
+
+  .footer{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:14px;
+  }
+
+  .info{
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .file-name{
+    font-size:13px;
+    color:var(--cinza-escuro);
+    margin-top:6px;
+  }
+
+  @media (max-width:780px) {
+    .controls-right{ margin-left:0; width:100%; justify-content:stretch; flex-direction:column; }
+    .top-row{flex-direction:column; align-items:stretch;}
+    .file-label, .select, .btn { width:100%;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="shell">
+
+    <!-- Header com logo central -->
+    <header role="banner">
+      <img src="assets/logo-horizontal.png" alt="Helija - Organização Contábil">
+    </header>
+
+    <!-- Card principal -->
+    <main class="container" role="main" aria-labelledby="main-title">
+      <h1 id="main-title">Painel — Lançamentos Folha</h1>
+      <p class="lead">Escolha o tipo de processamento, faça upload do Excel e gere o arquivo .txt com os lançamentos.</p>
+
+      <div class="top-row" role="region" aria-label="Opções e upload">
+        <label>
+          <span class="small">Tipo de processamento</span>
+          <select id="mode" class="select" aria-label="Selecionar tipo">
+            <option value="geral">Lançamentos Folha - Geral</option>
+            <option value="delgrossi">Lançamentos Folha - Del Grossi Semanal</option>
+          </select>
+        </label>
+
+        <div>
+          <span class="small">Planilha Excel</span><br>
+          <input type="file" id="file" class="file-input" accept=".xlsx,.xls" />
+          <label for="file" class="file-label" title="Selecionar arquivo Excel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:0.8" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v9" stroke="#1F4466" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#1F4466" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="fileLabel">Escolher arquivo</span>
+          </label>
+          <div class="file-name" id="fileName" aria-live="polite"></div>
+        </div>
+
+        <div class="controls-right" style="margin-left:auto;">
+          <button id="processBtn" class="btn" title="Gerar arquivo .txt">Gerar arquivo .txt</button>
+          <button id="previewBtn" class="secondary" title="Visualizar resultado">Visualizar</button>
+          <button id="clearBtn" class="secondary" title="Limpar">Limpar</button>
+        </div>
+      </div>
+
+      <div id="preview" class="preview" aria-live="polite">Nenhum processamento ainda.</div>
+
+      <div class="footer" aria-hidden="false">
+        <div class="info">Desenvolvido por Helija</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="downloadBtn" class="btn" style="display:none">Baixar arquivo.txt</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<!-- ====== JavaScript (logica mantida do arquivo original) ====== -->
+<script>
+const fileInput = document.getElementById('file');
+const fileLabel = document.getElementById('fileLabel');
+const fileName = document.getElementById('fileName');
+const preview = document.getElementById('preview');
+const processBtn = document.getElementById('processBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const previewBtn = document.getElementById('previewBtn');
+const clearBtn = document.getElementById('clearBtn');
+const modeSelect = document.getElementById('mode');
+
+let workbookData = null;
+let lastTxt = "";
+let uploadedFileName = "";
+
+fileInput.addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  uploadedFileName = f.name || "";
+  fileName.textContent = f.name;
+  fileLabel.textContent = 'Arquivo selecionado';
+  const data = await f.arrayBuffer();
+  workbookData = XLSX.read(data, {type:'array', cellDates:false, raw:true});
+  preview.textContent = 'Arquivo carregado: ' + f.name + '. Pronto para processamento.';
+  downloadBtn.style.display = 'none';
+});
+
+processBtn.addEventListener('click', () => {
+  if (!workbookData) {
+    preview.textContent = 'Por favor, selecione uma planilha Excel antes de processar.';
+    return;
+  }
+  const mode = modeSelect.value;
+  try {
+    let lines = [];
+    if (mode === 'geral') {
+      lines = runLancamentosFolhaGeral(workbookData);
+    } else {
+      lines = runLancamentosDelGrossi(workbookData);
+    }
+    lastTxt = lines.join("\r\n");
+    const total = lines.length;
+    if (lines.length === 0) {
+      preview.textContent = 'Processamento executado, mas nenhuma linha gerada. Verifique as abas e cabeçalhos.';
+      downloadBtn.style.display = 'none';
+    } else {
+      preview.textContent = `Processamento concluído — ${total} linhas geradas.`;
+      downloadBtn.style.display = 'inline-block';
+      const blob = new Blob([lastTxt], {type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      downloadBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'lancamentos.txt';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
+    }
+  } catch (err) {
+    preview.textContent = 'Erro ao processar: ' + (err && err.message ? err.message : String(err));
+    console.error(err);
+  }
+});
+
+previewBtn.addEventListener('click', () => {
+  preview.textContent = lastTxt || 'Nenhum resultado gerado ainda.';
+});
+
+clearBtn.addEventListener('click', () => {
+  workbookData = null;
+  lastTxt = "";
+  fileInput.value = "";
+  fileLabel.textContent = "Escolher arquivo";
+  fileName.textContent = "";
+  preview.textContent = "Limpo.";
+  downloadBtn.style.display = 'none';
+});
+
+function getSheetIfExists(wb, name) {
+  const foundName = wb.SheetNames.find(sn => sn.toLowerCase() === name.toLowerCase());
+  return foundName ? wb.Sheets[foundName] : undefined;
+}
+
+function sheetToMatrix(ws) {
+  return XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:""});
+}
+
+function readCellString(ws, cellAddress) {
+  if (!ws) return "";
+  const cell = ws[cellAddress];
+  if (!cell) return "";
+  return String(cell.w ?? cell.v ?? "");
+}
+
+function padLeft(str, len) {
+  str = String(str ?? "");
+  return str.padStart(len, '0');
+}
+
+function parseBrazilNumber(val) {
+  if (val === null || val === undefined) return 0;
+  if (typeof val === "number") return val;
+  let s = String(val).trim();
+  if (s === "") return 0;
+  s = s.replace(/\\s/g,"").replace(/\\./g,"").replace(/,/g,".");
+  const n = Number(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function formatValorTo9(valor) {
+  const n = parseBrazilNumber(valor) || 0;
+  const s = n.toFixed(2).replace(".", "");
+  return s.padStart(9, '0');
+}
+
+function parseCompetencia(raw, fileNameFallback) {
+
+  // 👉 Se vier número (data Excel)
+  if (!isNaN(raw) && raw !== "") {
+    const excelEpoch = new Date(1899, 11, 30);
+    const d = new Date(excelEpoch.getTime() + Number(raw) * 86400000);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yy = String(d.getFullYear());
+    return yy + mm;
+  }
+
+  raw = String(raw || "").trim();
+
+  // MM/YYYY ou MM-YYYY
+  const m1 = raw.match(/(\d{2})[\/\-](\d{4})/);
+  if (m1) return m1[2] + m1[1];
+
+  // Nome do mês
+  const meses = {
+    'janeiro':'01','fevereiro':'02','março':'03','marco':'03',
+    'abril':'04','maio':'05','junho':'06','julho':'07',
+    'agosto':'08','setembro':'09','outubro':'10',
+    'novembro':'11','dezembro':'12'
+  };
+
+  const lower = raw.toLowerCase();
+  for (const nome in meses) {
+    if (lower.includes(nome)) {
+      const y = raw.match(/(20\d{2})/);
+      return (y ? y[0] : new Date().getFullYear()) + meses[nome];
+    }
+  }
+
+  // fallback pelo nome do arquivo
+  if (fileNameFallback) {
+    const f = String(fileNameFallback).match(/(20\d{2})[^0-9]*(\d{2})/);
+    if (f) return f[1] + f[2];
+  }
+
+  // fallback final
+  const d = new Date();
+  return d.getFullYear() + String(d.getMonth()+1).padStart(2,'0');
+}
+
+
+function findHeaderRow(matrix) {
+  if (!matrix || matrix.length === 0) return -1;
+  const keywords = ["emp","empresa","em","plano","plano de saude","plano de saúde","funcion","funcionário","funcionario","cod","cod.","cod funcionario","coop","copart","coparticip","cooparticipa","co-partici"];
+  const limit = Math.min(20, matrix.length);
+  for (let i = 0; i < limit; i++) {
+    const row = matrix[i] || [];
+    const rowText = row.map(c => String(c || "").toLowerCase()).join(" ");
+    for (const kw of keywords) {
+      if (rowText.includes(kw)) {
+        return i;
+      }
+    }
+    const first = String((row[0]||"")).trim().toLowerCase();
+    if (first === "emp" || first === "empresa" || first === "em") return i;
+  }
+  const r0 = (matrix[0] || []).map(c=>String(c||"").toLowerCase()).join(" ");
+  if (r0.includes("funcion") || r0.includes("plano") || r0.includes("coop") || r0.includes("copart")) return 0;
+  return -1;
+}
+
+/* ---------- Função principal Del Grossi (adaptada) ---------- */
+
+function runLancamentosDelGrossi(wb) {
+  const abaFolha = getSheetIfExists(wb, "FOLHA");
+  if (!abaFolha) throw new Error("Aba FOLHA não encontrada.");
+  const compC7 = readCellString(abaFolha, "C7") || "";
+  const compC6 = readCellString(abaFolha, "C6") || "";
+  const data = parseCompetencia(compC7 || compC6, uploadedFileName).trim();
+  const proc = String(compC6 || "").trim();
+  const mFolha = sheetToMatrix(abaFolha);
+  const lancFaltas = processarFaltasDelGrossi(mFolha, data, proc);
+  const lancFolha = processarFolhaDelGrossi(mFolha, data, proc);
+  return lancFaltas.concat(lancFolha);
+}
+
+function processarFaltasDelGrossi(matrix, data, proc) {
+  if (!matrix || matrix.length === 0) return [];
+  const ultima_linha = matrix.length - 3;
+  let lancamentos = [];
+  for (let lin = 11; lin <= ultima_linha; lin++) {
+    let data_falta = [];
+    for (let col = 3; col < 9; col++) {
+      let conteudo = matrix[lin] ? matrix[lin][col] : "";
+      if (String(conteudo).toUpperCase() === "FALTA") {
+        let valor = matrix[8] ? matrix[8][col] : "";
+        valor = Number(valor);
+        let d = new Date(1900, 0, valor - 1);
+        let ano = d.getFullYear();
+        let mes = (d.getMonth() + 1).toString().padStart(2, "0");
+        let dia = d.getDate().toString().padStart(2, "0");
+        let dataFormatada = `${ano}${mes}${dia}`;
+        data_falta.push("11" + dataFormatada + "1");
+      }
+    }
+    if (data_falta.length !== 0) {
+      const codRubrica = "384";
+      const codEmp = matrix[lin][0];
+      const codFunc = matrix[lin][1];
+      const contagem_faltas = data_falta.length;
+      const texto = "10" +
+        padLeft(codFunc,10) +
+        data +
+        padLeft(codRubrica,4) +
+        proc +
+        (String(contagem_faltas.toFixed(2)).replace(".", "").padStart(9, '0')) +
+        padLeft(codEmp,10);
+      lancamentos.push(texto, data_falta.join("\n"));
+    }
+  }
+  return lancamentos;
+}
+
+function processarFolhaDelGrossi(matrix, data, proc) {
+  if (!matrix || matrix.length === 0) return [];
+  const indiceCabecalho = 9;
+  const cabecalho = matrix[indiceCabecalho] || [];
+  const ultima_linha = matrix.length - 3;
+  let lancamentos = [];
+  for (let lin = 11; lin <= ultima_linha; lin++) {
+    let conteudo = matrix[0] ? matrix[0][2] : "";
+    let indice_coluna;
+    if (conteudo === "DEMONSTRATIVO DE PRODUÇÃO - JOAQUIM") indice_coluna = 9;
+    else indice_coluna = 11;
+    for (let col = indice_coluna; col < cabecalho.length; col++) {
+      const valorCabecalho = String(cabecalho[col] ?? "");
+      const pipe = valorCabecalho.indexOf("|");
+      let codRubrica = "";
+      if (pipe === -1) {
+        codRubrica = String((matrix[indiceCabecalho - 1] || [])[col] || "").trim();
+        if (!codRubrica) continue;
+      } else {
+        codRubrica = valorCabecalho.substring(pipe + 1).replace(/\s+/g,"").trim().padStart(4,"0");
+      }
+      const linha = matrix[lin] || [];
+      if ((linha[1] !== "" && linha[1] !== undefined) && (linha[col] !== "" && linha[col] !== undefined)) {
+        if (linha[col] !== 0 && linha[col] !== "0") {
+          const codFunc = linha[1];
+          let valor = parseBrazilNumber(linha[col]);
+          const codEmp = linha[0];
+            // --- Regra de arredondamento baseada no texto do cabeçalho ---
+            const headerText = String(cabecalho[col] ?? "").toUpperCase().trim();
+
+            // Lista dos cabeçalhos que devem ser arredondados
+            const headersQueArredondam = [
+            "ENCARREGADO",
+            "CARREGAMENTO",
+            "TOTAL CX",
+            "ADICIONAL DE MOTORISTA"
+            ];
+
+            // Se o texto do cabeçalho corresponder a alguma das regras, arredonda
+            if (headersQueArredondam.some(h => headerText.includes(h))) {
+                valor = Math.round(parseBrazilNumber(linha[col]));
+            }
+
+
+          if (isNaN(valor)) {
+            console.log("Na planilha FOLHA o valor da linha: " + (lin + 2) + " - coluna: " + (col + 1) + ", não é um numero válido!");
+          } else {
+            const texto = "10" +
+              padLeft(codFunc,10) +
+              data +
+              padLeft(codRubrica,4) +
+              proc +
+              formatValorTo9(valor) +
+              padLeft(codEmp,10);
+            lancamentos.push(texto);
+          }
+        }
+      }
+    }
+  }
+  return lancamentos;
+}
+
+
+/* ---------- Nova função: processarCoparticipacao (adaptada para matriz SheetJS) ---------- */
+
+function processarCoparticipacao(matrix, data, proc) {
+  if (!matrix || matrix.length === 0) return [];
+  const linhas = matrix;
+  let cabecalho = linhas[0] || [];
+  let lancamentos = [];
+
+  const valorProcurado = "emp";
+  let linha_encontrada = -1;
+
+  for (let i = 0; i < linhas.length; i++) {
+    if (String(linhas[i][0]).toLowerCase() === valorProcurado) {
+      cabecalho = linhas[i];
+      linha_encontrada = i;
+      break;
+    }
+  }
+  if (linha_encontrada === -1) return [];
+
+  // variaveis auxiliares
+  let lancamento = "";
+  let cabecalhoTxt = "";
+  let descricao = "";
+
+  // Guarda o funcionário e empresa anterior para saber quando mudou
+  let codFuncAnt = "";
+  let codEmpAnt = "";
+
+  // Acumula o valor total por funcionário
+  let valorEventoTotal = 0;
+
+  for (let col = 0; col < cabecalho.length; col++) {
+    const valorCabecalho = String(cabecalho[col] ?? "");
+    const pipe = valorCabecalho.indexOf("|");
+
+    if (pipe !== -1) {
+      const codRubrica = valorCabecalho.substring(pipe + 1, pipe + 5).replace(/\D/g, "");
+
+      for (let lin = linha_encontrada + 1; lin < linhas.length; lin++) {
+        const linha = linhas[lin] || [];
+
+        if (linha[col] === "" || linha[col] === undefined || linha[col] === null || linha[col] === 0) {
+          if (lin === linhas.length - 1 && codFuncAnt !== "") {
+              lancAtual = "10" + padLeft(codFuncAnt,10) + data + String(codRubrica).padStart(4,'0') + proc + formatValorTo9(valorEventoTotal) + padLeft(codEmpAnt,10),
+              lancamentos.push(lancAtual, cabecalhoTxt, descricao);
+          }
+          continue;
+        }
+
+        const codEmp = String(linha[0] ?? '').padStart(10, '0'); // Código da empresa
+        const cnpjPlano = String(linha[1] ?? '').replace(/[\.\-/]/g, ""); // CNPJ do plano (sem máscara)
+        const codFunc = String(linha[2] ?? '').padStart(10, '0'); // Código do funcionário
+        const tipoContrib = String(linha[3] ?? ''); // Tipo de contribuição ("T" ou outro)
+        const codDependente = String(linha[4] ?? '').padStart(10, '0'); // Código do dependente
+        const valorEvento = parseBrazilNumber(linha[col]); // Valor do evento
+        const codigo = tipoContrib === "T" ? codFunc : codDependente; // Decide qual código usar
+
+        if (codFuncAnt === "") {
+          codFuncAnt = codFunc;
+          codEmpAnt = codEmp;
+          valorEventoTotal = Number(valorEvento);
+
+          //if (!valorEvento) continue;
+
+          // Monta a linha 10 com dados principais
+          lancamento = "10" + padLeft(codFunc,10) + data + String(codRubrica).padStart(4,'0') + proc + formatValorTo9(valorEventoTotal) + codEmp;
+
+          // Monta a linha 20 com o CNPJ
+          cabecalhoTxt = "20" + cnpjPlano;
+
+          // Monta a primeira linha 25 com a contribuição
+          descricao = "25" + tipoContrib + codigo + formatValorTo9(valorEvento);
+        }
+        // Se for o mesmo funcionário anterior, acumula
+        else if (codFuncAnt === codFunc) {
+
+          //if (!valorEvento) continue;
+
+          valorEventoTotal += Number(valorEvento);
+
+          // Adiciona nova linha 25 à descrição (com quebra de linha)
+          lancamento = "10" + padLeft(codFunc,10) + data + String(codRubrica).padStart(4,'0') + proc + formatValorTo9(valorEventoTotal) + codEmp;
+          descricao += "\n25" + tipoContrib + codigo + formatValorTo9(valorEvento);
+          console.log("COPART DEBUG: inicializado bloco -> codFuncAnt=", codFuncAnt, "valorEventoTotal=", valorEventoTotal);  
+
+        }
+        // Se for um novo funcionário, salva os dados anteriores e reinicia os acumuladores
+        else {
+          // Adiciona os 3 blocos (10, 20, 25) ao array de lançamentos
+          lancamentos.push(lancamento, cabecalhoTxt, descricao);
+
+          // Atualiza os dados com o novo funcionário
+          codFuncAnt = codFunc;
+          codEmpAnt = codEmp;
+          valorEventoTotal = Number(valorEvento);
+
+          // Cria os novos blocos para esse novo funcionário
+          lancamento = "10" + padLeft(codFunc,10) + data + String(codRubrica).padStart(4,'0') + proc + formatValorTo9(valorEventoTotal) + codEmp;
+          cabecalhoTxt = "20" + cnpjPlano;
+          descricao = "25" + tipoContrib + codigo + formatValorTo9(valorEvento);
+        }
+
+        // Se estiver na última linha do arquivo, adiciona o bloco final
+        if (lin === linhas.length-1) {
+          lancamentos.push(
+            "10" + padLeft(codFuncAnt,10) + data + String(codRubrica).padStart(4,'0') + proc + formatValorTo9(valorEventoTotal) + padLeft(codEmpAnt,10),
+            cabecalhoTxt,
+            descricao
+          );
+        }
+      }
+    }
+  }
+  return lancamentos;
+}
+
+/* ---------- Compatibilidade: função já existente para 'geral' (mantive) ---------- */
+
+function runLancamentosFolhaGeral(wb) {
+  const abaComp = getSheetIfExists(wb, "COMPETENCIA");
+  const abaFolha = getSheetIfExists(wb, "FOLHA");
+  const abaCopart = getSheetIfExists(wb, "COPARTICIPACAO");
+  if (!abaComp || !abaFolha) throw new Error("Planilhas COMPETENCIA e FOLHA são obrigatórias.");
+  const dataProvisoria = readCellString(abaComp, "A1");
+  console.log(dataProvisoria)
+  const A1Mes = dataProvisoria.substring(0, 2);
+  const A1Ano = dataProvisoria.substring(3, 7);
+  const data = A1Ano + A1Mes;
+  //const data = parseCompetencia(dataProvisoria, uploadedFileName);
+  console.log("data formatada:" + data)
+  const proc = readCellString(abaComp, "B1") || "";
+  const lancFolha = (function(matrix){ /* simplified inlined from prior code */ 
+    if (!matrix || matrix.length === 0) return [];
+    let cabecalho = matrix[0];
+    console.log("cabecalho: " + cabecalho);
+    let lanc = [];
+    const valorProcurado = "emp";
+    let linha_encontrada = -1;
+    for (let i = 0; i < matrix.length; i++) {
+      if (String(matrix[i][0]).toLowerCase() === valorProcurado) {cabecalho = matrix[i]; linha_encontrada = i; break;}
+    }
+    if (linha_encontrada === -1) return [];
+    for (let col = 4; col < cabecalho.length; col++) {
+      const valorCabecalho = String(cabecalho[col] ?? "");
+      const pipe = valorCabecalho.indexOf("|");
+      if (pipe !== -1) {
+        const codRubrica = valorCabecalho.substring(pipe + 1).replace(/\s+/g,"").trim().padStart(4,"0");
+        for (let lin = linha_encontrada + 1; lin < matrix.length; lin++) {
+          const linha = matrix[lin];
+          if ((linha[0] !== "" && linha[0] !== undefined) && (linha[col] !== "" && linha[col] !== undefined)) {
+            const codFunc = String(linha[1] ?? "");
+            const valor = parseBrazilNumber(linha[col]);
+            const codEmp = String(linha[0] ?? "");
+            if (isNaN(Number(valor)) || Number(valor) === 0) continue;
+            const texto = "10" + padLeft(codFunc,10) + data + padLeft(codRubrica,4) + proc + formatValorTo9(valor) + padLeft(codEmp,10);
+            lanc.push(texto);
+          }
+        }
+      }
+    }
+    return lanc;
+  })(sheetToMatrix(abaFolha) || {}); // placeholder: runLancamentosFolhaGeral unused when DelGrossi selected
+
+  // Integra agora a COPARTICIPACAO quando existir
+  let lancCopart = [];
+  if (abaCopart) {
+    const mCopart = sheetToMatrix(abaCopart);
+    lancCopart = processarCoparticipacao(mCopart, data, proc);
+  }
+
+  return lancFolha.concat(lancCopart);
+}
+</script>
+</body>
+</html>
