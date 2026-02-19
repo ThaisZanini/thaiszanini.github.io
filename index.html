@@ -177,36 +177,13 @@ Converter arquivos para o formato do sistema
 function abrir(pagina){
 window.location.href = pagina;
 }
-
-
-  const chavesAutorizadas = [
-
-"HELJA123",
-"DP2024",
-"THAIS",
-"CONTABIL"
-];
-
-
-
-function abrirConversor(){
-let chave = prompt("Digite a chave de acesso:");
-if(chave === null) return;
-
-if(chavesAutorizadas.includes(chave.toUpperCase())){
-window.open("conversor-dp.html", "_self");
-}
-else{
-alert("Acesso negado");}
-
-}
-
 </script>
 
 </script>
 
 </body>
 </html>
+
 
 
 
